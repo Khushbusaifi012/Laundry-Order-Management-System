@@ -7,8 +7,47 @@ from app.models import Order, OrderStatus
 _DEFAULT_DB = Path(__file__).resolve().parent.parent / "data" / "oms.db"
 
 
+def _filter_orders(
+    orders: List[Order],
+    status: Optional[OrderStatus] = None,
+    customer_name: Optional[str] = None,
+    phone: Optional[str] = None,
+    garment: Optional[str] = None,
+) -> List[Order]:
+    result = list(orders)
+    if status is not None:
+        result = [o for o in result if o.status == status]
+    if customer_name:
+        q = customer_name.strip().lower()
+        result = [o for o in result if q in o.customer_name.lower()]
+    if phone:
+        q = phone.strip()
+        result = [o for o in result if q in o.phone]
+    if garment:
+        q = garment.strip().lower()
+        result = [
+            o
+            for o in result
+            if any(q in line.garment.lower() for line in o.items)
+        ]
+    result.sort(key=lambda o: o.created_at, reverse=True)
+    return result
+
+
+def _dashboard(orders: List[Order]) -> dict:
+    revenue = sum(o.total for o in orders)
+    per_status = {s.value: 0 for s in OrderStatus}
+    for o in orders:
+        per_status[o.status.value] = per_status.get(o.status.value, 0) + 1
+    return {
+        "total_orders": len(orders),
+        "total_revenue": round(revenue, 2),
+        "orders_per_status": per_status,
+    }
+
+
 class OrderStore:
-    """Persists orders in SQLite so data survives server restarts."""
+    """Persists orders in SQLite at data/oms.db."""
 
     def __init__(self, db_path: Optional[Path] = None) -> None:
         self._path = db_path or _DEFAULT_DB
@@ -74,33 +113,13 @@ class OrderStore:
         phone: Optional[str] = None,
         garment: Optional[str] = None,
     ) -> List[Order]:
-        result = self._all_orders()
-        if status is not None:
-            result = [o for o in result if o.status == status]
-        if customer_name:
-            q = customer_name.strip().lower()
-            result = [o for o in result if q in o.customer_name.lower()]
-        if phone:
-            q = phone.strip()
-            result = [o for o in result if q in o.phone]
-        if garment:
-            q = garment.strip().lower()
-            result = [
-                o
-                for o in result
-                if any(q in line.garment.lower() for line in o.items)
-            ]
-        result.sort(key=lambda o: o.created_at, reverse=True)
-        return result
+        return _filter_orders(
+            self._all_orders(),
+            status=status,
+            customer_name=customer_name,
+            phone=phone,
+            garment=garment,
+        )
 
     def dashboard_stats(self) -> dict:
-        orders = self._all_orders()
-        revenue = sum(o.total for o in orders)
-        per_status = {s.value: 0 for s in OrderStatus}
-        for o in orders:
-            per_status[o.status.value] = per_status.get(o.status.value, 0) + 1
-        return {
-            "total_orders": len(orders),
-            "total_revenue": round(revenue, 2),
-            "orders_per_status": per_status,
-        }
+        return _dashboard(self._all_orders())

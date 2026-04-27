@@ -1,6 +1,6 @@
 # Laundry Order Management System (Mini OMS)
 
-A small **FastAPI** service for a dry cleaner: create orders, track status, compute bills, and view dashboard stats. Orders are saved in **SQLite** at `data/oms.db` (created automatically) so they **survive server restarts**. To wipe all data, delete that file while the server is stopped.
+A small **FastAPI** service for a dry cleaner: create orders, track status, compute bills, and view dashboard stats. Orders are stored in **SQLite** at `data/oms.db` (survives restarts). Delete that file to reset all data.
 
 ## Setup
 
@@ -27,6 +27,25 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 - **Web UI:** http://127.0.0.1:8000/ — dashboard, create order, filter orders, change status  
 - **Interactive docs (Swagger):** http://127.0.0.1:8000/docs  
 - **Health check:** http://127.0.0.1:8000/health  
+
+### MySQL (optional)
+
+1. Create an empty database in MySQL (e.g. `laundry_oms`) and a user with full rights on that database.
+2. Install deps (`pip install -r requirements.txt` includes `pymysql` and **`cryptography`** — required for MySQL 8 default auth).
+3. Set environment variables, then start Uvicorn **from the `OMS` folder**:
+
+**Windows PowerShell (example):**
+
+```powershell
+$env:OMS_MYSQL_HOST = "127.0.0.1"
+$env:OMS_MYSQL_PORT = "3306"
+$env:OMS_MYSQL_USER = "your_user"
+$env:OMS_MYSQL_PASSWORD = "your_password"
+$env:OMS_MYSQL_DATABASE = "laundry_oms"
+python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+If **`OMS_MYSQL_HOST` is not set**, the app uses **SQLite** as before. The `orders` table is created automatically on first run.
 
 ## API overview
 
@@ -79,7 +98,7 @@ Allowed values: `RECEIVED`, `PROCESSING`, `READY`, `DELIVERED`.
 - List orders with filters: **status**, **customer name**, **phone**
 - **Delete order** by id (`DELETE /orders/{order_id}`)
 - **Dashboard:** total orders, total revenue, orders per status
-- **SQLite** (`data/oms.db`): orders persist across **restarts** and **`--reload`**
+- **SQLite** (`data/oms.db`): orders persist across **restarts**
 - **Bonus:** filter by **garment** substring on line items; **estimated delivery date** on create (optional, default +3 days)
 - **Simple frontend:** single-page UI at `/` (no React build step)
 - **Postman:** import `postman_collection.json` (optional)
@@ -90,7 +109,7 @@ Allowed values: `RECEIVED`, `PROCESSING`, `READY`, `DELIVERED`.
 
 | Tool | How you used it |
 |------|------------------|
-| *(e.g. ChatGPT / Cursor / Copilot)* | Scaffolding FastAPI routes, Pydantic models, README structure |
+| *( Cursor)* | Scaffolding FastAPI routes, Pydantic models, README structure |
 
 **Sample prompts you might have used:**
 
@@ -112,14 +131,14 @@ Allowed values: `RECEIVED`, `PROCESSING`, `READY`, `DELIVERED`.
 
 **Skipped (time / scope):**
 
-- MongoDB / hosted SQL — local **SQLite** is used instead (`data/oms.db`).
+- MySQL / PostgreSQL / MongoDB — **SQLite** only (`data/oms.db`).
 - Authentication.
 - Separate React SPA (current UI is one `index.html` served by FastAPI).
 - Deployment — can add Render/Railway later by pinning `requirements.txt` and running `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
 
 **With more time:**
 
-- PostgreSQL / hosted DB for multi-server deployments.
+- MySQL or PostgreSQL for multi-server / team setups.
 - Simple JWT or API key for staff-only endpoints.
 - Estimated delivery date field and `GET` filter by date.
 
