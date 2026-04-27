@@ -28,24 +28,7 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 - **Interactive docs (Swagger):** http://127.0.0.1:8000/docs  
 - **Health check:** http://127.0.0.1:8000/health  
 
-### MySQL (optional)
-
-1. Create an empty database in MySQL (e.g. `laundry_oms`) and a user with full rights on that database.
-2. Install deps (`pip install -r requirements.txt` includes `pymysql` and **`cryptography`** — required for MySQL 8 default auth).
-3. Set environment variables, then start Uvicorn **from the `OMS` folder**:
-
-**Windows PowerShell (example):**
-
-```powershell
-$env:OMS_MYSQL_HOST = "127.0.0.1"
-$env:OMS_MYSQL_PORT = "3306"
-$env:OMS_MYSQL_USER = "your_user"
-$env:OMS_MYSQL_PASSWORD = "your_password"
-$env:OMS_MYSQL_DATABASE = "laundry_oms"
-python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
-```
-
-If **`OMS_MYSQL_HOST` is not set**, the app uses **SQLite** as before. The `orders` table is created automatically on first run.
+If port **8000** is busy on Windows, use another port, e.g. `--port 18080`, and open **http://127.0.0.1:18080/** (do not open `http://0.0.0.0:...` in the browser).
 
 ## API overview
 
@@ -138,9 +121,9 @@ Allowed values: `RECEIVED`, `PROCESSING`, `READY`, `DELIVERED`.
 
 **With more time:**
 
-- MySQL or PostgreSQL for multi-server / team setups.
+- Hosted DB (e.g. PostgreSQL) for multi-server / team setups.
 - Simple JWT or API key for staff-only endpoints.
-- Estimated delivery date field and `GET` filter by date.
+- `GET /orders` filter by estimated delivery date range.
 
 ## Project structure
 
