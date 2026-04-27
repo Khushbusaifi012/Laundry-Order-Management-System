@@ -1,0 +1,86 @@
+{
+  "info": {
+    "name": "Laundry OMS",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:8000" },
+    { "key": "orderId", "value": "ORD-REPLACE_AFTER_CREATE" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/health"
+      }
+    },
+    {
+      "name": "Create order",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customer_name\": \"Asha Verma\",\n  \"phone\": \"+91-9876501234\",\n  \"items\": [\n    { \"garment\": \"Shirt\", \"quantity\": 3, \"unit_price\": 80 },\n    { \"garment\": \"Saree\", \"quantity\": 1, \"unit_price\": 350 }\n  ],\n  \"estimated_delivery_date\": \"2026-04-30\"\n}"
+        },
+        "url": "{{baseUrl}}/orders"
+      }
+    },
+    {
+      "name": "List orders (filters optional)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/orders?status=RECEIVED&customer_name=&phone=&garment=",
+          "host": ["{{baseUrl}}"],
+          "path": ["orders"],
+          "query": [
+            { "key": "status", "value": "RECEIVED" },
+            { "key": "customer_name", "value": "" },
+            { "key": "phone", "value": "" },
+            { "key": "garment", "value": "" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get order by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/orders/{{orderId}}"
+      }
+    },
+    {
+      "name": "Update status",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"PROCESSING\"\n}"
+        },
+        "url": "{{baseUrl}}/orders/{{orderId}}/status"
+      }
+    },
+    {
+      "name": "Delete order",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/orders/{{orderId}}"
+      }
+    },
+    {
+      "name": "Dashboard",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/dashboard"
+      }
+    }
+  ]
+}

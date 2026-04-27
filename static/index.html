@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Laundry Order Management System</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --card: #fff;
+      --text: #1a1d21;
+      --muted: #5c6570;
+      --border: #e2e6ea;
+      --accent: #0d6b6b;
+      --accent-hover: #095252;
+      --danger: #b42318;
+      --ok: #0f6b2e;
+      --radius: 10px;
+      --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 650;
+    }
+    header a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    header a:hover { text-decoration: underline; }
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.25rem 1rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.15rem;
+    }
+    section h2 {
+      margin: 0 0 0.85rem;
+      font-size: 1rem;
+      font-weight: 650;
+    }
+    .grid-dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.75rem;
+    }
+    .stat {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 0.75rem 0.9rem;
+      border: 1px solid var(--border);
+    }
+    .stat .label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .stat .value { font-size: 1.35rem; font-weight: 700; margin-top: 0.2rem; }
+    .stat-list { font-size: 0.85rem; color: var(--muted); margin-top: 0.35rem; }
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
+    }
+    input, select, button {
+      font: inherit;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      padding: 0.45rem 0.6rem;
+      width: 100%;
+      max-width: 100%;
+    }
+    input:focus, select:focus {
+      outline: 2px solid rgba(13, 107, 107, 0.35);
+      border-color: var(--accent);
+    }
+    .row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.65rem;
+      margin-bottom: 0.65rem;
+    }
+    .items-block {
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      padding: 0.65rem;
+      margin-bottom: 0.65rem;
+      background: #fafbfc;
+    }
+    .items-block h3 {
+      margin: 0 0 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .item-line {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr auto;
+      gap: 0.5rem;
+      align-items: end;
+      margin-bottom: 0.5rem;
+    }
+    @media (max-width: 640px) {
+      .item-line { grid-template-columns: 1fr 1fr; }
+      .item-line button { grid-column: span 2; }
+    }
+    button {
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      font-weight: 600;
+      padding: 0.55rem 0.9rem;
+      width: auto;
+    }
+    button:hover { background: var(--accent-hover); }
+    button.secondary {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    button.secondary:hover { background: var(--bg); }
+    button.danger {
+      background: #fff;
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+    button.danger:hover { background: #fef3f2; }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-top: 0.5rem; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.5rem 0.45rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    th { color: var(--muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; }
+    tr:hover td { background: #fafbfc; }
+    .mono { font-family: ui-monospace, monospace; font-size: 0.8rem; }
+    .msg {
+      margin-top: 0.65rem;
+      padding: 0.55rem 0.65rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+    }
+    .msg.ok { background: #e8f5e9; color: var(--ok); border: 1px solid #b7dfb8; }
+    .msg.err { background: #fef3f2; color: var(--danger); border: 1px solid #fecdca; }
+    .small { font-size: 0.8rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Laundry Order management System</h1>
+    <a href="/docs" target="_blank" rel="noopener">API docs (Swagger)</a>
+  </header>
+  <main>
+    <section aria-labelledby="dash-title">
+      <h2 id="dash-title">Dashboard</h2>
+      <div class="grid-dashboard" id="dashboard">
+        <p class="small">Loading…</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="create-title">
+      <h2 id="create-title">Create order</h2>
+      <div class="row">
+        <div>
+          <label for="cust-name">Customer name</label>
+          <input id="cust-name" autocomplete="name" />
+        </div>
+        <div>
+          <label for="cust-phone">Phone</label>
+          <input id="cust-phone" type="tel" autocomplete="tel" />
+        </div>
+        <div>
+          <label for="cust-delivery">Estimated delivery (optional)</label>
+          <input id="cust-delivery" type="date" />
+        </div>
+      </div>
+      <div class="items-block">
+        <h3>Garments</h3>
+        <div id="item-rows"></div>
+        <button type="button" class="secondary" id="add-item">Add line</button>
+      </div>
+      <div class="actions">
+        <button type="button" id="submit-order">Create order</button>
+      </div>
+      <div id="create-msg"></div>
+    </section>
+
+    <section aria-labelledby="list-title">
+      <h2 id="list-title">Orders</h2>
+      <div class="row">
+        <div>
+          <label for="f-status">Status</label>
+          <select id="f-status">
+            <option value="">Any</option>
+            <option>RECEIVED</option>
+            <option>PROCESSING</option>
+            <option>READY</option>
+            <option>DELIVERED</option>
+          </select>
+        </div>
+        <div>
+          <label for="f-name">Customer name contains</label>
+          <input id="f-name" placeholder="e.g. Asha" />
+        </div>
+        <div>
+          <label for="f-phone">Phone contains</label>
+          <input id="f-phone" placeholder="digits" />
+        </div>
+        <div>
+          <label for="f-garment">Garment contains</label>
+          <input id="f-garment" placeholder="e.g. Saree" />
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" class="secondary" id="refresh-orders">Apply filters & refresh</button>
+      </div>
+      <div id="orders-wrap"></div>
+    </section>
+  </main>
+
+  <script>
+    const api = (path, opts = {}) =>
+      fetch(path, {
+        headers: { "Content-Type": "application/json", ...(opts.headers || {}) },
+        ...opts,
+      });
+
+    function el(html) {
+      const t = document.createElement("template");
+      t.innerHTML = html.trim();
+      return t.content.firstElementChild;
+    }
+
+    async function loadDashboard() {
+      const box = document.getElementById("dashboard");
+      try {
+        const r = await api("/dashboard");
+        if (!r.ok) throw new Error(await r.text());
+        const d = await r.json();
+        const per = d.orders_per_status || {};
+        const statusLines = Object.entries(per)
+          .map(([k, v]) => `${k}: ${v}`)
+          .join(" · ");
+        box.innerHTML = `
+          <div class="stat"><div class="label">Total orders</div><div class="value">${d.total_orders}</div></div>
+          <div class="stat"><div class="label">Total revenue</div><div class="value">${Number(d.total_revenue).toFixed(2)}</div></div>
+          <div class="stat"><div class="label">By status</div><div class="value" style="font-size:0.95rem">${statusLines || "—"}</div></div>
+        `;
+      } catch (e) {
+        box.innerHTML = `<p class="small" style="color:var(--danger)">Could not load dashboard.</p>`;
+      }
+    }
+
+    function addItemRow(garment = "", qty = 1, price = "") {
+      const wrap = document.getElementById("item-rows");
+      const row = el(`
+        <div class="item-line">
+          <div><label>Garment</label><input class="g-garment" value="${garment.replace(/"/g, "&quot;")}" placeholder="Shirt" /></div>
+          <div><label>Qty</label><input class="g-qty" type="number" min="1" step="1" value="${qty}" /></div>
+          <div><label>Unit price</label><input class="g-price" type="number" min="0" step="0.01" value="${price}" placeholder="80" /></div>
+          <div><label>&nbsp;</label><button type="button" class="danger rm">Remove</button></div>
+        </div>
+      `);
+      row.querySelector(".rm").onclick = () => row.remove();
+      wrap.appendChild(row);
+    }
+
+    document.getElementById("add-item").onclick = () => addItemRow();
+    addItemRow("Shirt", 1, 80);
+    addItemRow("Pants", 1, 120);
+
+    function showMsg(id, text, ok) {
+      const n = document.getElementById(id);
+      if (!text) { n.innerHTML = ""; return; }
+      n.innerHTML = `<div class="msg ${ok ? "ok" : "err"}">${text}</div>`;
+    }
+
+    document.getElementById("submit-order").onclick = async () => {
+      const name = document.getElementById("cust-name").value.trim();
+      const phone = document.getElementById("cust-phone").value.trim();
+      const delivery = document.getElementById("cust-delivery").value;
+      const lines = [...document.querySelectorAll("#item-rows .item-line")].map((row) => ({
+        garment: row.querySelector(".g-garment").value.trim(),
+        quantity: Number(row.querySelector(".g-qty").value),
+        unit_price: Number(row.querySelector(".g-price").value),
+      })).filter((x) => x.garment);
+
+      if (!name || !phone) {
+        showMsg("create-msg", "Customer name and phone are required.", false);
+        return;
+      }
+      if (!lines.length) {
+        showMsg("create-msg", "Add at least one garment line.", false);
+        return;
+      }
+      for (const L of lines) {
+        if (!Number.isFinite(L.quantity) || L.quantity < 1 || !Number.isFinite(L.unit_price) || L.unit_price < 0) {
+          showMsg("create-msg", "Each line needs garment name, quantity ≥ 1, and valid unit price.", false);
+          return;
+        }
+      }
+
+      const body = { customer_name: name, phone, items: lines };
+      if (delivery) body.estimated_delivery_date = delivery;
+
+      try {
+        const r = await api("/orders", { method: "POST", body: JSON.stringify(body) });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          const detail = data.detail ? JSON.stringify(data.detail) : JSON.stringify(data);
+          showMsg("create-msg", `Error: ${detail}`, false);
+          return;
+        }
+        showMsg(
+          "create-msg",
+          `Created <span class="mono">${data.id}</span> — total <strong>${Number(data.total).toFixed(2)}</strong> — status ${data.status}.`,
+          true
+        );
+        await loadDashboard();
+        await loadOrders();
+      } catch (e) {
+        showMsg("create-msg", "Network error. Is the API running?", false);
+      }
+    };
+
+    function fmtItems(items) {
+      return items.map((i) => `${i.garment} ×${i.quantity} @ ${i.unit_price}`).join("; ");
+    }
+
+    async function loadOrders() {
+      const wrap = document.getElementById("orders-wrap");
+      const qs = new URLSearchParams();
+      const st = document.getElementById("f-status").value;
+      const fn = document.getElementById("f-name").value.trim();
+      const fp = document.getElementById("f-phone").value.trim();
+      const fg = document.getElementById("f-garment").value.trim();
+      if (st) qs.set("status", st);
+      if (fn) qs.set("customer_name", fn);
+      if (fp) qs.set("phone", fp);
+      if (fg) qs.set("garment", fg);
+      const q = qs.toString();
+      wrap.innerHTML = `<p class="small">Loading…</p>`;
+      try {
+        const r = await api("/orders" + (q ? "?" + q : ""));
+        if (!r.ok) throw new Error(await r.text());
+        const orders = await r.json();
+        if (!orders.length) {
+          wrap.innerHTML = `<p class="small">No orders match.</p>`;
+          return;
+        }
+        const rows = orders
+          .map((o) => {
+            const opts = ["RECEIVED", "PROCESSING", "READY", "DELIVERED"]
+              .map((s) => `<option value="${s}" ${o.status === s ? "selected" : ""}>${s}</option>`)
+              .join("");
+            return `<tr data-id="${o.id}">
+              <td class="mono">${o.id}</td>
+              <td>${o.customer_name}<br/><span class="small">${o.phone}</span></td>
+              <td class="small">${fmtItems(o.items)}</td>
+              <td><strong>${Number(o.total).toFixed(2)}</strong></td>
+              <td class="small">${o.estimated_delivery_date || "—"}</td>
+              <td><select class="st-sel">${opts}</select></td>
+              <td><div style="display:flex;gap:0.35rem;flex-wrap:wrap;align-items:center">
+                <button type="button" class="secondary save-st">Save</button>
+                <button type="button" class="danger del-st">Delete</button>
+              </div></td>
+            </tr>`;
+          })
+          .join("");
+        wrap.innerHTML = `
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr>
+                <th>ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Est. delivery</th><th>Status</th><th>Actions</th>
+              </tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>`;
+
+        wrap.querySelectorAll(".save-st").forEach((btn) => {
+          btn.onclick = async () => {
+            const tr = btn.closest("tr");
+            const id = tr.getAttribute("data-id");
+            const sel = tr.querySelector(".st-sel");
+            const status = sel.value;
+            try {
+              const r = await api(`/orders/${encodeURIComponent(id)}/status`, {
+                method: "PATCH",
+                body: JSON.stringify({ status }),
+              });
+              if (!r.ok) {
+                const err = await r.json().catch(() => ({}));
+                alert(err.detail || "Update failed");
+                return;
+              }
+              await loadDashboard();
+              await loadOrders();
+            } catch {
+              alert("Network error");
+            }
+          };
+        });
+
+        wrap.querySelectorAll(".del-st").forEach((btn) => {
+          btn.onclick = async () => {
+            const tr = btn.closest("tr");
+            const id = tr.getAttribute("data-id");
+            if (!confirm(`Delete order ${id}? This cannot be undone.`)) return;
+            try {
+              const r = await fetch(`/orders/${encodeURIComponent(id)}`, { method: "DELETE" });
+              if (r.status === 404) {
+                alert("Order not found");
+                return;
+              }
+              if (!r.ok) {
+                alert("Delete failed");
+                return;
+              }
+              await loadDashboard();
+              await loadOrders();
+            } catch {
+              alert("Network error");
+            }
+          };
+        });
+      } catch {
+        wrap.innerHTML = `<p class="small" style="color:var(--danger)">Could not load orders.</p>`;
+      }
+    }
+
+    document.getElementById("refresh-orders").onclick = () => loadOrders();
+
+    loadDashboard();
+    loadOrders();
+  </script>
+</body>
+</html>

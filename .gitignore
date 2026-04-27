@@ -1,0 +1,12 @@
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.env
+.idea/
+.vscode/
+
+# Local SQLite data (optional: remove to reset all orders)
+data/oms.db
