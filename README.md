@@ -103,21 +103,6 @@ Cursor for Scaffolding FastAPI routes, Pydantic models, README structure|
 - Added CORS so a simple HTML/JS UI or Postman can call the API easily.
 - Added optional `garment` filter for the assignment bonus.
 
-## Tradeoffs
-
-**Skipped (time / scope):**
-
-- MySQL / PostgreSQL / MongoDB — **SQLite** only (`data/oms.db`).
-- Authentication.
-- Separate React SPA (current UI is one `index.html` served by FastAPI).
-- Deployment — can add Render/Railway later by pinning `requirements.txt` and running `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
-
-**With more time:**
-
-- Hosted DB (e.g. PostgreSQL) for multi-server / team setups.
-- Simple JWT or API key for staff-only endpoints.
-- `GET /orders` filter by estimated delivery date range.
-
 ## Project structure
 
 ```
