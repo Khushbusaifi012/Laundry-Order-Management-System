@@ -85,10 +85,9 @@ Allowed values: `RECEIVED`, `PROCESSING`, `READY`, `DELIVERED`.
 - **Postman:** import `postman_collection.json` (optional)
 
 ## AI usage report
-| Tool | How you used it |
-|Cursor|Scaffolding FastAPI routes, Pydantic models, README structure|
+Cursor for Scaffolding FastAPI routes, Pydantic models, README structure|
 
-**Sample prompts you might have used:**
+**Sample prompts I have used:**
 
 1. *“Generate a FastAPI app with in-memory order store: POST create order with items and computed total, PATCH status enum, GET list with query filters, GET dashboard aggregates.”*
 2. *“Review this Python code for edge cases: empty items, negative quantity, invalid status.”*
