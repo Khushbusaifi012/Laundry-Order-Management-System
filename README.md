@@ -4,7 +4,7 @@ A small **FastAPI** service for a dry cleaner: create orders, track status, comp
 
 ## Setup
 
-**Requirements:** Python 3.10+ recommended (3.9+ should work).
+**Requirements:** Python 3.10.
 
 ```bash
 cd "path/to/OMS"
@@ -27,8 +27,6 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 - **Web UI:** http://127.0.0.1:8000/ — dashboard, create order, filter orders, change status  
 - **Interactive docs (Swagger):** http://127.0.0.1:8000/docs  
 - **Health check:** http://127.0.0.1:8000/health  
-
-If port **8000** is busy on Windows, use another port, e.g. `--port 18080`, and open **http://127.0.0.1:18080/** (do not open `http://0.0.0.0:...` in the browser).
 
 ## API overview
 
@@ -72,7 +70,7 @@ Allowed values: `RECEIVED`, `PROCESSING`, `READY`, `DELIVERED`.
 - `GET /orders?status=READY`
 - `GET /orders?customer_name=Asha`
 - `GET /orders?phone=98765`
-- `GET /orders?garment=Saree` (bonus filter)
+- `GET /orders?garment=Saree`
 
 ## Features implemented
 
@@ -87,12 +85,8 @@ Allowed values: `RECEIVED`, `PROCESSING`, `READY`, `DELIVERED`.
 - **Postman:** import `postman_collection.json` (optional)
 
 ## AI usage report
-
-*Personalize this section for your submission. Below is a honest template.*
-
 | Tool | How you used it |
-|------|------------------|
-| *( Cursor)* | Scaffolding FastAPI routes, Pydantic models, README structure |
+|Cursor|Scaffolding FastAPI routes, Pydantic models, README structure|
 
 **Sample prompts you might have used:**
 
@@ -141,7 +135,3 @@ OMS/
   postman_collection.json
   README.md
 ```
-
-## License
-
-MIT (or replace with your preference for the assignment repo).
