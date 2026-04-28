@@ -6,7 +6,7 @@ A small **FastAPI** service for a dry cleaner: create orders, track status, comp
 
 ## Setup
 
-**Requirements:** Python 3.10+ recommended (3.9+ should work).
+**Requirements:** Python 3.10.
 
 ```bash
 cd "path/to/OMS"
@@ -139,7 +139,3 @@ OMS/
   postman_collection.json
   README.md
 ```
-
-## License
-
-MIT
