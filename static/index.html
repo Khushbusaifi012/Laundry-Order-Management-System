@@ -185,11 +185,62 @@
     .msg.ok { background: #e8f5e9; color: var(--ok); border: 1px solid #b7dfb8; }
     .msg.err { background: #fef3f2; color: var(--danger); border: 1px solid #fecdca; }
     .small { font-size: 0.8rem; color: var(--muted); }
+    #toast-host {
+      position: fixed;
+      top: max(1rem, env(safe-area-inset-top, 0px));
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: center;
+      pointer-events: none;
+      width: min(380px, calc(100vw - 2rem));
+    }
+    .toast {
+      pointer-events: auto;
+      width: 100%;
+      max-width: min(380px, calc(100vw - 2rem));
+      padding: 0.85rem 1.1rem;
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      font-weight: 600;
+      line-height: 1.35;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      opacity: 0;
+      transform: translateY(-12px);
+      transition: opacity 0.28s ease, transform 0.28s ease;
+    }
+    .toast--show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .toast--ok {
+      border-color: #b7dfb8;
+      background: #f4fbf4;
+      color: var(--ok);
+    }
+    .toast--err {
+      border-color: #fecdca;
+      background: #fff8f7;
+      color: var(--danger);
+    }
+    .toast__detail {
+      display: block;
+      margin-top: 0.35rem;
+      font-weight: 500;
+      font-size: 0.82rem;
+      opacity: 0.92;
+    }
   </style>
 </head>
 <body>
   <header>
-    <h1>Laundry Order management System</h1>
+    <h1>Laundry Order Management System</h1>
     <a href="/docs" target="_blank" rel="noopener">API docs (Swagger)</a>
   </header>
   <main>
@@ -266,6 +317,34 @@
         headers: { "Content-Type": "application/json", ...(opts.headers || {}) },
         ...opts,
       });
+
+    let toastHideTimer = null;
+    function showToast(message, kind, detail) {
+      let host = document.getElementById("toast-host");
+      if (!host) {
+        host = document.createElement("div");
+        host.id = "toast-host";
+        host.setAttribute("aria-live", "polite");
+        document.body.appendChild(host);
+      }
+      host.querySelectorAll(".toast").forEach((n) => n.remove());
+      const t = document.createElement("div");
+      t.className = "toast toast--" + (kind === "err" ? "err" : "ok");
+      t.appendChild(document.createTextNode(message));
+      if (detail) {
+        const s = document.createElement("span");
+        s.className = "toast__detail";
+        s.textContent = detail;
+        t.appendChild(s);
+      }
+      host.appendChild(t);
+      requestAnimationFrame(() => t.classList.add("toast--show"));
+      clearTimeout(toastHideTimer);
+      toastHideTimer = setTimeout(() => {
+        t.classList.remove("toast--show");
+        setTimeout(() => t.remove(), 320);
+      }, 4000);
+    }
 
     function el(html) {
       const t = document.createElement("template");
@@ -353,10 +432,11 @@
           showMsg("create-msg", `Error: ${detail}`, false);
           return;
         }
-        showMsg(
-          "create-msg",
-          `Created <span class="mono">${data.id}</span> — total <strong>${Number(data.total).toFixed(2)}</strong> — status ${data.status}.`,
-          true
+        showMsg("create-msg", "", true);
+        showToast(
+          "Order created successfully",
+          "ok",
+          `${data.id} · total ${Number(data.total).toFixed(2)} · ${data.status}`
         );
         await loadDashboard();
         await loadOrders();
@@ -432,13 +512,15 @@
               });
               if (!r.ok) {
                 const err = await r.json().catch(() => ({}));
-                alert(err.detail || "Update failed");
+                const msg = typeof err.detail === "string" ? err.detail : "Update failed";
+                showToast("Could not save status", "err", msg);
                 return;
               }
+              showToast("Status saved", "ok", `${id} → ${status}`);
               await loadDashboard();
               await loadOrders();
             } catch {
-              alert("Network error");
+              showToast("Network error", "err", "Try again in a moment.");
             }
           };
         });
@@ -451,17 +533,18 @@
             try {
               const r = await fetch(`/orders/${encodeURIComponent(id)}`, { method: "DELETE" });
               if (r.status === 404) {
-                alert("Order not found");
+                showToast("Order not found", "err");
                 return;
               }
               if (!r.ok) {
-                alert("Delete failed");
+                showToast("Delete failed", "err");
                 return;
               }
+              showToast("Order deleted", "ok", id);
               await loadDashboard();
               await loadOrders();
             } catch {
-              alert("Network error");
+              showToast("Network error", "err", "Try again in a moment.");
             }
           };
         });
