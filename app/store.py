@@ -1,10 +1,33 @@
+import os
 import sqlite3
 from pathlib import Path
 from typing import List, Optional
 
+import psycopg
+
 from app.models import Order, OrderStatus
 
 _DEFAULT_DB = Path(__file__).resolve().parent.parent / "data" / "oms.db"
+
+
+def _resolved_db_path() -> Path:
+    """Use OMS_DB_PATH on hosts with a persistent disk. Default: ./data/oms.db."""
+    raw = os.environ.get("OMS_DB_PATH", "").strip()
+    if raw:
+        return Path(raw).expanduser().resolve()
+    return _DEFAULT_DB
+
+
+def _postgres_dsn() -> Optional[str]:
+    """Use Postgres only for postgresql:// URLs (Render). Ignore sqlite:// etc."""
+    raw = os.environ.get("DATABASE_URL", "").strip()
+    if not raw:
+        return None
+    if raw.startswith("postgres://"):
+        raw = raw.replace("postgres://", "postgresql://", 1)
+    if not raw.startswith("postgresql://"):
+        return None
+    return raw
 
 
 def _filter_orders(
@@ -47,15 +70,31 @@ def _dashboard(orders: List[Order]) -> dict:
 
 
 class OrderStore:
-    """Persists orders in SQLite at data/oms.db."""
+    """Persists orders: PostgreSQL when DATABASE_URL is set, else SQLite (data/oms.db)."""
 
     def __init__(self, db_path: Optional[Path] = None) -> None:
-        self._path = db_path or _DEFAULT_DB
-        self._path.parent.mkdir(parents=True, exist_ok=True)
-        self._init_db()
+        self._pg_dsn = _postgres_dsn()
+        if self._pg_dsn:
+            self._sqlite_path = None
+            self._init_postgres()
+        else:
+            self._sqlite_path = db_path or _resolved_db_path()
+            self._sqlite_path.parent.mkdir(parents=True, exist_ok=True)
+            self._init_sqlite()
 
-    def _init_db(self) -> None:
-        with sqlite3.connect(self._path) as conn:
+    def _init_sqlite(self) -> None:
+        with sqlite3.connect(self._sqlite_path) as conn:
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS orders (
+                    id TEXT PRIMARY KEY NOT NULL,
+                    data TEXT NOT NULL
+                )
+                """
+            )
+
+    def _init_postgres(self) -> None:
+        with psycopg.connect(self._pg_dsn) as conn:
             conn.execute(
                 """
                 CREATE TABLE IF NOT EXISTS orders (
@@ -66,24 +105,45 @@ class OrderStore:
             )
 
     def _all_orders(self) -> List[Order]:
-        with sqlite3.connect(self._path) as conn:
-            cur = conn.execute("SELECT data FROM orders")
-            rows = cur.fetchall()
+        if self._pg_dsn:
+            with psycopg.connect(self._pg_dsn) as conn:
+                cur = conn.execute("SELECT data FROM orders")
+                rows = cur.fetchall()
+        else:
+            with sqlite3.connect(self._sqlite_path) as conn:
+                cur = conn.execute("SELECT data FROM orders")
+                rows = cur.fetchall()
         return [Order.model_validate_json(row[0]) for row in rows]
 
     def add(self, order: Order) -> Order:
         payload = order.model_dump_json()
-        with sqlite3.connect(self._path) as conn:
-            conn.execute(
-                "INSERT INTO orders (id, data) VALUES (?, ?)",
-                (order.id, payload),
-            )
+        if self._pg_dsn:
+            with psycopg.connect(self._pg_dsn) as conn:
+                conn.execute(
+                    "INSERT INTO orders (id, data) VALUES (%s, %s)",
+                    (order.id, payload),
+                )
+        else:
+            with sqlite3.connect(self._sqlite_path) as conn:
+                conn.execute(
+                    "INSERT INTO orders (id, data) VALUES (?, ?)",
+                    (order.id, payload),
+                )
         return order
 
     def get(self, order_id: str) -> Optional[Order]:
-        with sqlite3.connect(self._path) as conn:
-            cur = conn.execute("SELECT data FROM orders WHERE id = ?", (order_id,))
-            row = cur.fetchone()
+        if self._pg_dsn:
+            with psycopg.connect(self._pg_dsn) as conn:
+                cur = conn.execute(
+                    "SELECT data FROM orders WHERE id = %s", (order_id,)
+                )
+                row = cur.fetchone()
+        else:
+            with sqlite3.connect(self._sqlite_path) as conn:
+                cur = conn.execute(
+                    "SELECT data FROM orders WHERE id = ?", (order_id,)
+                )
+                row = cur.fetchone()
         if row is None:
             return None
         return Order.model_validate_json(row[0])
@@ -94,15 +154,28 @@ class OrderStore:
             return None
         updated = order.model_copy(update={"status": status})
         payload = updated.model_dump_json()
-        with sqlite3.connect(self._path) as conn:
-            conn.execute(
-                "UPDATE orders SET data = ? WHERE id = ?",
-                (payload, order_id),
-            )
+        if self._pg_dsn:
+            with psycopg.connect(self._pg_dsn) as conn:
+                conn.execute(
+                    "UPDATE orders SET data = %s WHERE id = %s",
+                    (payload, order_id),
+                )
+        else:
+            with sqlite3.connect(self._sqlite_path) as conn:
+                conn.execute(
+                    "UPDATE orders SET data = ? WHERE id = ?",
+                    (payload, order_id),
+                )
         return updated
 
     def delete(self, order_id: str) -> bool:
-        with sqlite3.connect(self._path) as conn:
+        if self._pg_dsn:
+            with psycopg.connect(self._pg_dsn) as conn:
+                cur = conn.execute(
+                    "DELETE FROM orders WHERE id = %s", (order_id,)
+                )
+                return cur.rowcount > 0
+        with sqlite3.connect(self._sqlite_path) as conn:
             cur = conn.execute("DELETE FROM orders WHERE id = ?", (order_id,))
             return cur.rowcount > 0
 
