@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.models import CreateOrderRequest, Order, OrderStatus, UpdateStatusRequest
@@ -28,9 +28,10 @@ app.add_middleware(
 store = OrderStore()
 
 
-@app.get("/")
-def serve_ui() -> FileResponse:
-    return FileResponse(STATIC_DIR / "index.html")
+@app.get("/", response_class=HTMLResponse)
+def serve_ui() -> HTMLResponse:
+    html = (STATIC_DIR / "index.html").read_text(encoding="utf-8")
+    return HTMLResponse(content=html)
 
 
 @app.post("/orders", response_model=Order, status_code=201)
