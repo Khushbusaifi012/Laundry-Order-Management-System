@@ -1,0 +1,14 @@
+.venv
+venv
+__pycache__
+*.py[cod]
+.git
+.gitignore
+.pytest_cache
+.mypy_cache
+.idea
+.vscode
+.env
+*.md
+postman_collection.json
+data
