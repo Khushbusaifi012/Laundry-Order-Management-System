@@ -88,41 +88,6 @@ Allowed: `RECEIVED`, `PROCESSING`, `READY`, `DELIVERED`.
 - **Frontend:** single HTML page at `/`
 - **Postman:** `postman_collection.json`
 
-## AI usage report
-
-| Tool | How I used it |
-|------|----------------|
-| **Cursor** | Scaffold FastAPI routes, Pydantic models, SQLite `OrderStore`, static UI, README structure |
-
-**Sample prompts I used:**
-
-1. *“Build a Mini Laundry OMS in Python: FastAPI, create order with billing, status enum, list/filter, dashboard.”*
-2. *“Add SQLite persistence so orders survive server restart.”*
-3. *“Add DELETE endpoint and a simple HTML frontend served from FastAPI.”*
-
-**What AI got wrong or I had to adjust:**
-
-- Generic “repository layer” suggestions — **skipped** to keep the assignment simple.
-- In-memory-only at first — I **added SQLite** so data is not lost on `--reload`.
-- Wrong delivery dates if year is mistyped (`0026`) — **added Pydantic validator** (year ≥ 2000).
-
-**What I improved manually:**
-
-- `OrderStatus` enum, **404** for missing orders, **CORS** for browser/Postman.
-- **Delete** API + UI buttons; **garment** query filter; **estimated delivery** field.
-- Run notes: **127.0.0.1** vs `0.0.0.0` in browser, alternate port when 8000 is blocked.
-
-## Tradeoffs
-
-**Skipped / out of scope:**
-
-- Authentication; React SPA; cloud deploy (optional bonus).
-- MySQL/Postgres — **SQLite** is enough for a single-machine demo.
-
-**With more time:**
-
-- Hosted DB, auth (JWT/API key), filter orders by delivery date range, deploy (Render/Railway).
-
 ## Project structure
 
 ```
