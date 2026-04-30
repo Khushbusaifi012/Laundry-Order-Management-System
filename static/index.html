@@ -4,32 +4,59 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Laundry Order Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #f4f6f8;
-      --card: #fff;
-      --text: #1a1d21;
-      --muted: #5c6570;
-      --border: #e2e6ea;
-      --accent: #0d6b6b;
-      --accent-hover: #095252;
-      --danger: #b42318;
-      --ok: #0f6b2e;
-      --radius: 10px;
-      --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      --bg: #1a2339;
+      --bg-accent:
+        radial-gradient(ellipse 900px 520px at 18% -8%, rgba(56, 189, 248, 0.14), transparent 55%),
+        radial-gradient(ellipse 800px 480px at 88% 12%, rgba(99, 102, 241, 0.12), transparent 50%),
+        radial-gradient(ellipse 700px 400px at 50% 100%, rgba(13, 148, 136, 0.08), transparent 45%);
+      --card: #ffffff;
+      --card-hover: #fcfcfd;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: rgba(15, 23, 42, 0.08);
+      --border-strong: rgba(15, 23, 42, 0.12);
+      --accent: #0d9488;
+      --accent-hover: #0f766e;
+      --accent-glow: rgba(13, 148, 136, 0.25);
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+      --ok: #15803d;
+      --radius: 14px;
+      --radius-sm: 10px;
+      --font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+      --mono: "JetBrains Mono", ui-monospace, monospace;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 8px 28px rgba(0, 0, 0, 0.25);
+      --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.32);
     }
     * { box-sizing: border-box; }
+    html { -webkit-font-smoothing: antialiased; }
     body {
       margin: 0;
       font-family: var(--font);
-      background: var(--bg);
+      background-color: var(--bg);
+      background-image: var(--bg-accent);
+      background-attachment: fixed;
       color: var(--text);
-      line-height: 1.45;
+      line-height: 1.5;
     }
     header {
-      background: var(--card);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
-      padding: 1rem 1.5rem;
+      padding: 0.875rem 1.25rem;
+    }
+    .header-inner {
+      max-width: 1120px;
+      margin: 0 auto;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -38,95 +65,174 @@
     }
     header h1 {
       margin: 0;
-      font-size: 1.15rem;
-      font-weight: 650;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    header h1::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #6366f1);
+      box-shadow: 0 0 12px var(--accent-glow);
     }
     header a {
-      color: var(--accent);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: var(--muted);
       text-decoration: none;
-      font-size: 0.9rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 0.4rem 0.85rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      transition: color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
     }
-    header a:hover { text-decoration: underline; }
+    header a:hover {
+      color: var(--accent);
+      border-color: rgba(13, 148, 136, 0.35);
+      box-shadow: 0 2px 8px rgba(13, 148, 136, 0.12);
+    }
     main {
-      max-width: 1100px;
+      max-width: 1120px;
       margin: 0 auto;
-      padding: 1.25rem 1rem 2.5rem;
+      padding: 1.5rem 1rem 3rem;
       display: flex;
       flex-direction: column;
-      gap: 1.25rem;
+      gap: 1.5rem;
     }
     section {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 1rem 1.15rem;
+      padding: 1.25rem 1.35rem;
+      box-shadow: var(--shadow);
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
     }
+    section:hover { box-shadow: var(--shadow-lg); border-color: var(--border-strong); }
     section h2 {
-      margin: 0 0 0.85rem;
-      font-size: 1rem;
-      font-weight: 650;
+      margin: 0 0 1rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
     }
     .grid-dashboard {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 0.75rem;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
     }
     .stat {
-      background: var(--bg);
-      border-radius: 8px;
-      padding: 0.75rem 0.9rem;
+      position: relative;
+      background: linear-gradient(145deg, #fafafa 0%, #fff 100%);
+      border-radius: var(--radius-sm);
+      padding: 1rem 1.1rem;
       border: 1px solid var(--border);
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .stat::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), #818cf8);
+      opacity: 0.85;
+    }
+    .stat:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
     }
     .stat .label {
-      font-size: 0.75rem;
+      font-size: 0.6875rem;
       color: var(--muted);
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.08em;
+      font-weight: 600;
     }
-    .stat .value { font-size: 1.35rem; font-weight: 700; margin-top: 0.2rem; }
+    .stat .value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 0.35rem;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.2;
+    }
     .stat-list { font-size: 0.85rem; color: var(--muted); margin-top: 0.35rem; }
     label {
       display: block;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
+      font-weight: 500;
       color: var(--muted);
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.35rem;
     }
-    input, select, button {
+    input, select {
       font: inherit;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      padding: 0.45rem 0.6rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-strong);
+      padding: 0.5rem 0.75rem;
       width: 100%;
       max-width: 100%;
+      background: #fff;
+      color: var(--text);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
+    input::placeholder { color: #94a3b8; }
     input:focus, select:focus {
-      outline: 2px solid rgba(13, 107, 107, 0.35);
+      outline: none;
       border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
     }
     .row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 0.65rem;
-      margin-bottom: 0.65rem;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 0.85rem;
     }
     .items-block {
-      border: 1px dashed var(--border);
-      border-radius: 8px;
-      padding: 0.65rem;
-      margin-bottom: 0.65rem;
-      background: #fafbfc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      margin-bottom: 0.85rem;
+      background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
+      display: flex;
+      flex-direction: column;
     }
     .items-block h3 {
-      margin: 0 0 0.5rem;
-      font-size: 0.85rem;
+      margin: 0 0 0.65rem;
+      font-size: 0.8125rem;
       font-weight: 600;
+      color: var(--text);
+    }
+    #item-rows {
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.35rem;
+    }
+    #add-item {
+      align-self: flex-start;
     }
     .item-line {
       display: grid;
       grid-template-columns: 2fr 1fr 1fr auto;
-      gap: 0.5rem;
+      gap: 0.65rem;
       align-items: end;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.65rem;
+      padding-bottom: 0.65rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .item-line:last-of-type {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0.35rem;
     }
     @media (max-width: 640px) {
       .item-line { grid-template-columns: 1fr 1fr; }
@@ -134,31 +240,74 @@
     }
     button {
       cursor: pointer;
-      background: var(--accent);
-      color: #fff;
+      font: inherit;
+      border-radius: var(--radius-sm);
       border: none;
       font-weight: 600;
-      padding: 0.55rem 0.9rem;
+      font-size: 0.875rem;
+      padding: 0.55rem 1rem;
       width: auto;
+      transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
     }
-    button:hover { background: var(--accent-hover); }
+    button:active { transform: scale(0.98); }
+    button:not(.secondary):not(.danger) {
+      background: linear-gradient(180deg, #14b8a6 0%, var(--accent) 100%);
+      color: #fff;
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 2px 8px rgba(13, 148, 136, 0.35);
+    }
+    button:not(.secondary):not(.danger):hover {
+      background: linear-gradient(180deg, #2dd4bf 0%, var(--accent-hover) 100%);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 4px 14px rgba(13, 148, 136, 0.4);
+    }
     button.secondary {
       background: var(--card);
       color: var(--text);
-      border: 1px solid var(--border);
+      border: 1px solid var(--border-strong);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
     }
-    button.secondary:hover { background: var(--bg); }
+    button.secondary:hover {
+      background: #f8fafc;
+      border-color: var(--muted);
+    }
     button.danger {
-      background: #fff;
+      background: var(--card);
       color: var(--danger);
-      border: 1px solid var(--danger);
+      border: 1px solid rgba(220, 38, 38, 0.35);
     }
-    button.danger:hover { background: #fef3f2; }
-    .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-top: 0.5rem; }
+    button.danger:hover { background: var(--danger-bg); border-color: var(--danger); }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; margin-top: 0.65rem; }
+    section:has(#create-title) > .actions {
+      justify-content: center;
+    }
+    .orders-filters-row {
+      gap: 1rem;
+      margin-bottom: 0;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    section:has(#list-title) .orders-filters-row label {
+      margin-bottom: 0.5rem;
+    }
+    section:has(#list-title) > .actions {
+      justify-content: center;
+      margin-top: 1.35rem;
+    }
+    section:has(#list-title) > #orders-wrap {
+      margin-top: 1.35rem;
+    }
+    #orders-wrap {
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      background: var(--card);
+      min-height: 2.5rem;
+    }
+    #orders-wrap > p.small { padding: 1rem 1.25rem; margin: 0; }
+    #orders-wrap > div { background: var(--card); overflow-x: auto; }
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.85rem;
+      font-size: 0.8125rem;
     }
     #orders-wrap table {
       min-width: 720px;
@@ -169,21 +318,35 @@
     }
     th, td {
       text-align: left;
-      padding: 0.5rem 0.45rem;
+      padding: 0.65rem 0.75rem;
       border-bottom: 1px solid var(--border);
       vertical-align: top;
     }
-    th { color: var(--muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; }
-    tr:hover td { background: #fafbfc; }
-    .mono { font-family: ui-monospace, monospace; font-size: 0.8rem; }
+    tbody tr:last-child td { border-bottom: none; }
+    thead th {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: #f1f5f9;
+    }
+    tbody tr { transition: background 0.12s ease; }
+    tbody tr:hover td { background: #f8fafc; }
+    .mono { font-family: var(--mono); font-size: 0.78rem; font-weight: 500; }
+    .st-sel {
+      padding: 0.4rem 0.55rem !important;
+      font-size: 0.8125rem;
+      border-radius: 8px !important;
+    }
     .msg {
       margin-top: 0.65rem;
       padding: 0.55rem 0.65rem;
       border-radius: 8px;
       font-size: 0.85rem;
     }
-    .msg.ok { background: #e8f5e9; color: var(--ok); border: 1px solid #b7dfb8; }
-    .msg.err { background: #fef3f2; color: var(--danger); border: 1px solid #fecdca; }
+    .msg.ok { background: #f0fdf4; color: var(--ok); border: 1px solid #86efac; }
+    .msg.err { background: var(--danger-bg); color: var(--danger); border: 1px solid #fecaca; }
     .small { font-size: 0.8rem; color: var(--muted); }
     #toast-host {
       position: fixed;
@@ -240,8 +403,10 @@
 </head>
 <body>
   <header>
-    <h1>Laundry Order Management System</h1>
-    <a href="/docs" target="_blank" rel="noopener">API docs (Swagger)</a>
+    <div class="header-inner">
+      <h1>Laundry Order Management System</h1>
+      <a href="/docs" target="_blank" rel="noopener">API docs →</a>
+    </div>
   </header>
   <main>
     <section aria-labelledby="dash-title">
@@ -280,7 +445,7 @@
 
     <section aria-labelledby="list-title">
       <h2 id="list-title">Orders</h2>
-      <div class="row">
+      <div class="row orders-filters-row">
         <div>
           <label for="f-status">Status</label>
           <select id="f-status">
@@ -305,7 +470,7 @@
         </div>
       </div>
       <div class="actions">
-        <button type="button" class="secondary" id="refresh-orders">Apply filters & refresh</button>
+        <button type="button" id="refresh-orders">Apply filters & refresh</button>
       </div>
       <div id="orders-wrap"></div>
     </section>
