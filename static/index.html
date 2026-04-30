@@ -722,7 +722,8 @@
       })).filter((x) => x.garment);
 
       if (!name || !phone) {
-        showMsg("create-msg", "Customer name and phone are required.", false);
+        showMsg("create-msg", "");
+        showToast("Customer name and phone are required.", "err");
         return;
       }
       if (!lines.length) {
